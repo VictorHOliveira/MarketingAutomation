@@ -93,7 +93,7 @@ def publish_site(content_file, site_repo_path):
         print(f"Artigo com slug '{slug}' já existe no site. Pulando...")
         return True
 
-    today = datetime.now().strftime('%Y-%m-%d')
+    today = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
     dated = datetime.now().strftime('%B %d, %Y %I:%M %p')
 
     body_md = blog.get('body_markdown', '')
@@ -149,7 +149,7 @@ def publish_site(content_file, site_repo_path):
         print(f"ERRO no push: {result.stderr}")
         return False
 
-    print(f"Deploy iniciado! URL: https://qaoverflow.com/{slug}")
+    print(f"Deploy iniciado! URL: https://qaoverflow.com/post/{slug}/")
     return True
 
 
