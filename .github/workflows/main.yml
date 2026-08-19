@@ -33,7 +33,7 @@ jobs:
       - name: Prepare content
         run: |
           mkdir -p output
-          cp content/${{ inputs.project }}*_all_content.json output/
+          cp content/*${{ inputs.project }}*_all_content.json output/
 
       - name: Install dependencies
         run: pip install requests
@@ -41,7 +41,7 @@ jobs:
       - name: Publish to Dev.to
         env:
           DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
-        run: python publish_devto.py output/${{ inputs.project }}*_all_content.json
+        run: python publish_devto.py output/*${{ inputs.project }}*_all_content.json
 
   publish-linkedin:
     name: Publicar no LinkedIn
@@ -60,7 +60,7 @@ jobs:
       - name: Prepare content
         run: |
           mkdir -p output
-          cp content/${{ inputs.project }}*_all_content.json output/
+          cp content/*${{ inputs.project }}*_all_content.json output/
 
       - name: Install dependencies
         run: pip install requests
@@ -69,7 +69,7 @@ jobs:
         env:
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
           LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
-        run: python publish_linkedin.py output/${{ inputs.project }}*_all_content.json
+        run: python publish_linkedin.py output/*${{ inputs.project }}*_all_content.json
 
   summary:
     name: Resumo
