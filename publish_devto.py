@@ -28,6 +28,9 @@ def publish_article(api_key, content):
 
     payload["article"]["tags"] = blog.get("tags", ["qa", "testing", "automation"])[:4]
 
+    if blog.get("slug"):
+        payload["article"]["canonical_url"] = f"https://qaoverflow.com/{blog['slug']}"
+
     headers = {
         "api-key": api_key,
         "Content-Type": "application/json; charset=utf-8",

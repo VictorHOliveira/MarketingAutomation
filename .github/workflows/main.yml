@@ -16,10 +16,53 @@ env:
   PYTHON_VERSION: '3.12'
 
 jobs:
+  publish-site:
+    name: Publicar no Site
+    runs-on: ubuntu-latest
+    if: inputs.dry_run != 'true' && inputs.project == 'qa_overflow'
+
+    steps:
+      - name: Checkout Marketing Automation
+        uses: actions/checkout@v4
+
+      - name: Checkout QA Overflow Site
+        uses: actions/checkout@v4
+        with:
+          repository: VictorHOliveira/QA_OverFlow
+          path: qaoverflow-site
+          token: ${{ secrets.QA_OVERFLOW_PAT }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Prepare content
+        run: |
+          mkdir -p output
+          cp content/*${{ inputs.project }}*_all_content.json output/
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Publish to Site
+        run: python publish_site.py output/*${{ inputs.project }}*_all_content.json qaoverflow-site
+
+  wait-deploy:
+    name: Aguardar Deploy
+    runs-on: ubuntu-latest
+    needs: [publish-site]
+    if: always() && needs.publish-site.result == 'success'
+
+    steps:
+      - name: Wait for GitHub Pages deploy
+        run: sleep 30
+
   publish-devto:
     name: Publicar no Dev.to
     runs-on: ubuntu-latest
-    if: inputs.dry_run != 'true'
+    needs: [wait-deploy]
+    if: always() && inputs.dry_run != 'true' && (needs.wait-deploy.result == 'success' || needs.publish-site.result == 'skipped')
 
     steps:
       - name: Checkout
@@ -46,7 +89,8 @@ jobs:
   publish-linkedin:
     name: Publicar no LinkedIn
     runs-on: ubuntu-latest
-    if: inputs.dry_run != 'true'
+    needs: [wait-deploy]
+    if: always() && inputs.dry_run != 'true' && (needs.wait-deploy.result == 'success' || needs.publish-site.result == 'skipped')
 
     steps:
       - name: Checkout
@@ -73,7 +117,7 @@ jobs:
 
   summary:
     name: Resumo
-    needs: [publish-devto, publish-linkedin]
+    needs: [publish-site, publish-devto, publish-linkedin]
     runs-on: ubuntu-latest
     if: always()
 
@@ -84,6 +128,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Canal | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Site QA Overflow | ${{ needs.publish-site.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Dev.to | ${{ needs.publish-devto.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| LinkedIn | ${{ needs.publish-linkedin.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
