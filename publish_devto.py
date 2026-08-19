@@ -16,20 +16,21 @@ def publish_article(api_key, content):
         print("  Nenhum blog_post encontrado no JSON, pulando...")
         return None
 
+    devto = content.get("devto", {})
+    tags = devto.get("tags", blog.get("tags", ["qa", "testing", "automation"]))[:4]
+
     payload = {
         "article": {
             "title": blog["title"],
             "body_markdown": blog["body_markdown"],
-            "tags": blog.get("tags", ["qa", "testing", "automation"]),
+            "tags": tags,
             "published": True,
             "description": blog.get("description", ""),
         }
     }
 
-    payload["article"]["tags"] = blog.get("tags", ["qa", "testing", "automation"])[:4]
-
     if blog.get("slug"):
-        payload["article"]["canonical_url"] = f"https://qaoverflow.com/{blog['slug']}"
+        payload["article"]["canonical_url"] = devto.get("canonical_url", f"https://qaoverflow.com/post/{blog['slug']}/")
 
     headers = {
         "api-key": api_key,
