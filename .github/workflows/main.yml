@@ -1,6 +1,14 @@
 name: Marketing Automation
 
 on:
+  schedule:
+    # Conteudo novo: Seg, Qua, Sexta as 10h UTC (7h BRT)
+    - cron: '0 10 * * 1'  # Segunda
+    - cron: '0 10 * * 3'  # Quarta
+    - cron: '0 10 * * 5'  # Sexta
+    # Repost: Ter, Qui as 14h UTC (11h BRT)
+    - cron: '0 14 * * 2'  # Terca
+    - cron: '0 14 * * 4'  # Quinta
   workflow_dispatch:
     inputs:
       project:
@@ -11,15 +19,93 @@ on:
         description: 'Simular sem publicar (true/false)'
         required: false
         default: 'true'
+      mode:
+        description: 'Modo: auto (cron), new (conteudo novo), repost (repost antigo)'
+        required: false
+        default: 'auto'
 
 env:
   PYTHON_VERSION: '3.12'
 
 jobs:
+  detect-day:
+    name: Detectar Dia
+    runs-on: ubuntu-latest
+    outputs:
+      is_new_content: ${{ steps.detect.outputs.is_new_content }}
+      is_repost: ${{ steps.detect.outputs.is_repost }}
+      project: ${{ steps.detect.outputs.project }}
+      dry_run: ${{ steps.detect.outputs.dry_run }}
+    steps:
+      - name: Detect day type
+        id: detect
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MODE="${{ inputs.mode }}"
+            PROJECT="${{ inputs.project }}"
+            DRY_RUN="${{ inputs.dry_run }}"
+          else
+            # Cron: determinar pelo dia da semana
+            DAY_OF_WEEK=$(date -u +%u)
+            case $DAY_OF_WEEK in
+              1|3|5) MODE="new" ;;    # Seg, Qua, Sex
+              2|4) MODE="repost" ;;   # Ter, Qui
+              *) MODE="skip" ;;
+            esac
+            PROJECT="qa_overflow"
+            DRY_RUN="false"
+          fi
+
+          echo "Modo: $MODE"
+          echo "Projeto: $PROJECT"
+          echo "Dry Run: $DRY_RUN"
+
+          if [ "$MODE" = "new" ]; then
+            echo "is_new_content=true" >> $GITHUB_OUTPUT
+            echo "is_repost=false" >> $GITHUB_OUTPUT
+          elif [ "$MODE" = "repost" ]; then
+            echo "is_new_content=false" >> $GITHUB_OUTPUT
+            echo "is_repost=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_new_content=false" >> $GITHUB_OUTPUT
+            echo "is_repost=false" >> $GITHUB_OUTPUT
+          fi
+
+          echo "project=$PROJECT" >> $GITHUB_OUTPUT
+          echo "dry_run=$DRY_RUN" >> $GITHUB_OUTPUT
+
+  generate-content:
+    name: Gerar Conteudo
+    runs-on: ubuntu-latest
+    needs: [detect-day]
+    if: needs.detect-day.outputs.is_new_content == 'true' && needs.detect-day.outputs.dry_run != 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install requests openai pyyaml
+
+      - name: Generate and publish
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+          DRY_RUN: ${{ needs.detect-day.outputs.dry_run }}
+        run: python generate_and_publish.py ${{ needs.detect-day.outputs.project }}
+
   publish-site:
     name: Publicar no Site
     runs-on: ubuntu-latest
-    if: inputs.dry_run != 'true' && inputs.project == 'qa_overflow'
+    needs: [detect-day, generate-content]
+    if: always() && needs.detect-day.outputs.is_new_content == 'true' && needs.detect-day.outputs.dry_run != 'true' && needs.generate-content.result == 'success'
 
     steps:
       - name: Checkout Marketing Automation
@@ -40,19 +126,27 @@ jobs:
       - name: Prepare content
         run: |
           mkdir -p output
-          cp content/*${{ inputs.project }}*.json output/
+          cp content/*${{ needs.detect-day.outputs.project }}*.json output/ 2>/dev/null || true
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests pyyaml
 
       - name: Publish to Site
-        run: python publish_site.py output/*${{ inputs.project }}*.json qaoverflow-site
+        run: |
+          # Encontrar o JSON mais recente do projeto
+          JSON_FILE=$(ls -t output/*${{ needs.detect-day.outputs.project }}*.json 2>/dev/null | head -1)
+          if [ -n "$JSON_FILE" ]; then
+            python publish_site.py "$JSON_FILE" qaoverflow-site
+          else
+            echo "Nenhum arquivo de conteudo encontrado para o projeto"
+            exit 1
+          fi
 
   wait-deploy:
     name: Aguardar Deploy
     runs-on: ubuntu-latest
-    needs: [publish-site]
-    if: always() && needs.publish-site.result == 'success'
+    needs: [detect-day, publish-site]
+    if: always() && needs.detect-day.outputs.is_new_content == 'true' && needs.publish-site.result == 'success'
 
     steps:
       - name: Wait for GitHub Pages deploy
@@ -61,8 +155,12 @@ jobs:
   publish-devto:
     name: Publicar no Dev.to
     runs-on: ubuntu-latest
-    needs: [wait-deploy]
-    if: always() && inputs.dry_run != 'true' && (needs.wait-deploy.result == 'success' || needs.publish-site.result == 'skipped')
+    needs: [detect-day, generate-content, publish-site, wait-deploy]
+    if: |
+      always() && needs.detect-day.outputs.dry_run != 'true' && (
+        (needs.detect-day.outputs.is_repost == 'true') ||
+        (needs.detect-day.outputs.is_new_content == 'true' && (needs.wait-deploy.result == 'success' || needs.publish-site.result == 'skipped'))
+      )
 
     steps:
       - name: Checkout
@@ -73,24 +171,44 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Prepare content
-        run: |
-          mkdir -p output
-          cp content/*${{ inputs.project }}*.json output/
-
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests openai pyyaml
 
-      - name: Publish to Dev.to
+      - name: Publish to Dev.to (repost)
+        if: needs.detect-day.outputs.is_repost == 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
+          DRY_RUN: ${{ needs.detect-day.outputs.dry_run }}
+          QA_OVERFLOW_REPO: qaoverflow-site
+        run: |
+          # Checkout do site para ler posts.json
+          git clone https://github.com/VictorHOliveira/QA_OverFlow.git qaoverflow-site --depth 1
+          python repost.py
+
+      - name: Publish to Dev.to (new content)
+        if: needs.detect-day.outputs.is_new_content == 'true'
         env:
           DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
-        run: python publish_devto.py output/*${{ inputs.project }}*.json
+        run: |
+          mkdir -p output
+          JSON_FILE=$(ls -t output/*${{ needs.detect-day.outputs.project }}*.json 2>/dev/null | head -1)
+          if [ -n "$JSON_FILE" ]; then
+            python publish_devto.py "$JSON_FILE"
+          else
+            echo "Nenhum arquivo de conteudo encontrado"
+            exit 1
+          fi
 
   publish-linkedin:
     name: Publicar no LinkedIn
     runs-on: ubuntu-latest
-    needs: [wait-deploy]
-    if: always() && inputs.dry_run != 'true' && (needs.wait-deploy.result == 'success' || needs.publish-site.result == 'skipped')
+    needs: [detect-day, generate-content, publish-site, wait-deploy]
+    if: |
+      always() && needs.detect-day.outputs.dry_run != 'true' && (
+        (needs.detect-day.outputs.is_repost == 'true') ||
+        (needs.detect-day.outputs.is_new_content == 'true' && (needs.wait-deploy.result == 'success' || needs.publish-site.result == 'skipped'))
+      )
 
     steps:
       - name: Checkout
@@ -101,23 +219,45 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Prepare content
-        run: |
-          mkdir -p output
-          cp content/*${{ inputs.project }}*.json output/
-
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests openai pyyaml
 
-      - name: Publish to LinkedIn
+      - name: Publish to LinkedIn (repost)
+        if: needs.detect-day.outputs.is_repost == 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+          DRY_RUN: ${{ needs.detect-day.outputs.dry_run }}
+          QA_OVERFLOW_REPO: qaoverflow-site
+        run: |
+          # O repost.py ja gerou o JSON - usar o mais recente
+          JSON_FILE=$(ls -t output/*repost*.json 2>/dev/null | head -1)
+          if [ -n "$JSON_FILE" ]; then
+            python publish_linkedin.py "$JSON_FILE"
+          else
+            echo "Nenhum arquivo de repost encontrado"
+            exit 1
+          fi
+
+      - name: Publish to LinkedIn (new content)
+        if: needs.detect-day.outputs.is_new_content == 'true'
         env:
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
           LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
-        run: python publish_linkedin.py output/*${{ inputs.project }}*.json
+        run: |
+          mkdir -p output
+          JSON_FILE=$(ls -t output/*${{ needs.detect-day.outputs.project }}*.json 2>/dev/null | head -1)
+          if [ -n "$JSON_FILE" ]; then
+            python publish_linkedin.py "$JSON_FILE"
+          else
+            echo "Nenhum arquivo de conteudo encontrado"
+            exit 1
+          fi
 
   summary:
     name: Resumo
-    needs: [publish-site, publish-devto, publish-linkedin]
+    needs: [detect-day, generate-content, publish-site, publish-devto, publish-linkedin]
     runs-on: ubuntu-latest
     if: always()
 
@@ -126,12 +266,17 @@ jobs:
         run: |
           echo "## Resultado da Automacao de Marketing" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Campo | Valor |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Modo | ${{ needs.detect-day.outputs.is_new_content == 'true' && 'Conteudo Novo' || 'Repost' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Projeto | ${{ needs.detect-day.outputs.project }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dry Run | ${{ needs.detect-day.outputs.dry_run }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Canal | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Site QA Overflow | ${{ needs.publish-site.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Geracao IA | ${{ needs.generate-content.result || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Site QA Overflow | ${{ needs.publish-site.result || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Dev.to | ${{ needs.publish-devto.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| LinkedIn | ${{ needs.publish-linkedin.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Projeto: **${{ inputs.project }}**" >> $GITHUB_STEP_SUMMARY
-          echo "Dry Run: **${{ inputs.dry_run }}**" >> $GITHUB_STEP_SUMMARY
           echo "Executado em: $(date)" >> $GITHUB_STEP_SUMMARY

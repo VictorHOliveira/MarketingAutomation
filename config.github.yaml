@@ -1,0 +1,81 @@
+# ============================================================
+# CONFIGURACAO PARA GITHUB ACTIONS
+# Le API keys de variaveis de ambiente (secrets)
+# ============================================================
+
+projects:
+  qa_overflow:
+    name: "QA Overflow"
+    url: "https://qaoverflow.com"
+    description: "Blog tecnico de Quality Assurance e Automacao de Testes"
+    target_audience: "Profissionais de QA e automacao de testes"
+    language: "pt-BR"
+    rss_url: "https://qaoverflow.com/rss.xml"
+    categories:
+      - "boas-praticas"
+      - "tutoriais"
+      - "carreira"
+    tags_devto: ["qa", "testing", "automation", "javascript"]
+    linkedin_hashtags: ["#QA", "#TestesAutomatizados", "#QualityAssurance"]
+
+  scandoc:
+    name: "ScanDoc"
+    url: "https://scandoc.qaoverflow.com"
+    description: "Antivirus para documentos - detecta prompt injection antes de enviar para IA"
+    target_audience: "Profissionais de RH, TI, seguranca da informacao"
+    language: "pt-BR"
+    tags_devto: ["security", "python", "ai", "documents"]
+    linkedin_hashtags: ["#SegurancaDaInformacao", "#PromptInjection", "#IA"]
+
+  supertarefas:
+    name: "SuperTarefas"
+    url: "https://play.google.com/store/apps/details?id=com.supertarefas.app"
+    description: "App gamificado que transforma tarefas da casa em aventura para criancas"
+    target_audience: "Pais com criancas de 5-14 anos"
+    language: "pt-BR"
+    tags_devto: ["flutter", "mobile", "gamification", "firebase"]
+    linkedin_hashtags: ["#Gamificacao", "#Educacao", "#PaisEFilhos"]
+
+  qa_picker:
+    name: "QA OverFlow Picker"
+    url: "https://chrome.google.com/webstore/detail/qa-overflow-picker"
+    description: "Extensao Chrome para extrair seletores CSS/XPath com um clique"
+    target_audience: "QAs e engenheiros de automacao de testes"
+    language: "pt-BR"
+    tags_devto: ["testing", "chrome-extension", "javascript", "automation"]
+    linkedin_hashtags: ["#ChromeExtension", "#QA", "#Playwright", "#Selenium"]
+
+apis:
+  openai:
+    api_key: "${OPENAI_API_KEY}"
+    model: "gpt-4o-mini"
+    max_tokens: 2000
+
+content_generation:
+  qa_overflow:
+    tone: "tecnico e acessivel"
+    style: "tutorial pratico com exemplos de codigo"
+    word_count: 1500
+    include_code: true
+
+  scandoc:
+    tone: "profissional e educativo"
+    style: "artigo tecnico sobre seguranca de documentos"
+    word_count: 1200
+    include_code: false
+
+  supertarefas:
+    tone: "amigavel e motivador"
+    style: "dicas praticas para pais"
+    word_count: 800
+    include_code: false
+
+  qa_picker:
+    tone: "tecnico e direto"
+    style: "tutorial curto com demo"
+    word_count: 800
+    include_code: true
+
+paths:
+  base_dir: "."
+  output_dir: "output"
