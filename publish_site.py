@@ -127,6 +127,8 @@ def publish_site(content_file, site_repo_path):
 
     print(f"Post adicionado: {slug}")
 
+    subprocess.run(['git', 'config', 'user.email', 'bot@marketingautomation.dev'], cwd=site_repo_path, check=True)
+    subprocess.run(['git', 'config', 'user.name', 'Marketing Bot'], cwd=site_repo_path, check=True)
     subprocess.run(['git', 'add', 'src/_data/posts.json'], cwd=site_repo_path, check=True)
     subprocess.run(['git', 'commit', '-m', f'Add post: {blog["title"]}'], cwd=site_repo_path, check=True)
 
