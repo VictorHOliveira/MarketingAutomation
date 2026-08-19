@@ -1,0 +1,15 @@
+{
+  "project": "supertarefas",
+  "date": "2026-08-19",
+  "linkedin": {
+    "text": "Transformei as tarefas da casa dos meus filhos em uma aventura 🎮\n\nO SuperTarefas é um app que gamifica tarefas domésticas para crianças de 5 a 14 anos:\n\n⭐ Sistema de estrelas e níveis\n📦 Baú misterioso por completar todas as tarefas\n🃏 Cartas colecionáveis (com 5% de chance de lendária!)\n🏆 Conquistas desbloqueáveis\n👨‍👩‍👧 Modo pais com controle total\n\nMeus filhos agora brigam para fazer a cama. Não é piada.\n\nO app é gratuito, feito em Flutter + Firebase.\n\n👉 https://play.google.com/store/apps/details?id=com.supertarefas.app\n\n#Gamificacao #Educacao #PaisEFilhos #Flutter",
+    "image_prompt": "Happy child doing chores with gamification elements like stars and levels around them, colorful and cheerful design"
+  },
+  "reddit": [
+    {
+      "subreddit": "Parenting",
+      "title": "Gamizei as tarefas da casa dos meus filhos e funcionou demais",
+      "body": "Pais, preciso compartilhar isso.\n\nEstava lutando para fazer meus filhos (8 e 11 anos) colaborarem em casa. A mesma briga todo dia: \"Arruma seu quarto\", \"tira a mesa\", etc.\n\nCriei um app gamificado que:\n- Atribui pontos por tarefa concluída\n- Tem sistema de níveis (Aprendiz → Super Herói → Mestre das Tarefas)\n- Oferece recompensas que EU configuro (jogar videogame, ver filme, etc.)\n- Tem um \"baú misterioso\" se completarem todas as tarefas do dia\n- Cartas colecionáveis que eles ganham por sorte\n\nResultado:\n- Meu filho de 8 anos pediu pra tirar a mesa (sem pedir!)\n- Minha filha de 11 agora quer aspirar o quarto\n- Ambos fazem争ra pra ver quem completa mais tarefas\n\nO app se chama SuperTarefas, é grátis no Play Store: https://play.google.com/store/apps/details?id=com.supertarefas.app\n\nAlguém já tentou gamificar tarefas com os filhos? Como funcionou?"
+    }
+  ]
+}

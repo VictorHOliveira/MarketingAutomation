@@ -1,0 +1,23 @@
+{
+  "project": "qa_picker",
+  "date": "2026-08-19",
+  "blog_post": {
+    "title": "Extraia Seletores CSS e XPath com Um Clique: A Extensão Chrome que Todo QA Precisa",
+    "description": "Apresentação do QA OverFlow Picker, extensão Chrome gratuita que extrai XPath, CSS Selector, ID e atributos de qualquer elemento web com um clique.",
+    "slug": "extrair-seletores-css-xpath-chrome-extension",
+    "tags": ["testing", "chrome-extension", "javascript", "automation"],
+    "excerpt": "Cansado de clicar com botão direito → Inspecionar → copiar selector? Uma extensão faz isso em um clique.",
+    "body_markdown": "# Extraia Seletores CSS e XPath com Um Clique\n\nEscrever seletores é uma das partes mais chatas da automação de testes. Ficar alternando entre o navegador e o código, copiando e colando XPath ou CSS Selector, testando se funciona...\n\nFoi por isso que criei o **[QA OverFlow Picker](https://chrome.google.com/webstore/detail/qa-overflow-picker)** — uma extensão Chrome que extrai todos os seletores de um elemento com um clique.\n\n## O que a extensão faz\n\nAo clicar em qualquer elemento da página:\n\n✅ **XPath Absoluto** e **Relativo**\n✅ **CSS Selector**\n✅ **ID, Name, Class, Tag**\n✅ **Atributos** (data-testid, aria-label, type, etc.)\n✅ **Verificação de unicidade** (check verde = único, alerta = múltiplo)\n✅ **Editor ao vivo** — edite o selector e veja os resultados na página\n✅ **Cópia com um clique**\n\n## Como usar com Playwright\n\n```\n1. Instale o QA OverFlow Picker na Chrome Web Store\n2. Ative com Ctrl+Shift+E\n3. Clique no elemento desejado\n4. Copie o CSS Selector ou XPath\n5. Cole no seu teste Playwright\n```\n\nExemplo:\n```typescript\n// Antes: ficar inspecionando manualmente\nconst button = page.locator('button[data-testid=\"submit\"]');\n\n// Com o Picker: um clique, copia, cola\nconst button = page.locator('button.submit-primary');\n```\n\n## Diferencial: Editor Ao Vivo\n\nOutras extensões mostram o selector. O QA OverFlow Picker permite **editar** ele na sidebar e vê em tempo real quais elementos correspondem. Isso é incrível para:\n\n- Encontrar o selector mais curto e estável\n- Verificar se o selector pega o elemento certo\n- Ensinar iniciantes a entender como seletores funcionam\n\n## Gratuito e Privado\n\nA extensão não coleta nenhum dado. Tudo fica no seu navegador.\n\n👉 [Instale grátis na Chrome Web Store](https://chrome.google.com/webstore/detail/qa-overflow-picker)\n\n---\n*Por Victor Oliveira - QA Senior, criador do QA Overflow*"
+  },
+  "linkedin": {
+    "text": "Cansado de ficar alternando entre o navegador e o código para copiar seletores? 🔄\n\nCriei uma extensão Chrome que resolve isso em um clique:\n\n🔵 QA OverFlow Picker\n\nClica em qualquer elemento da página e obtém:\n- XPath Absoluto e Relativo\n- CSS Selector\n- ID, Name, Class, Tag\n- Atributos (data-testid, aria-label, etc.)\n\nBônus: um **editor ao vivo** onde você modifica o selector e vê na página quais elementos ele pega.\n\nFunciona com Playwright, Cypress, Selenium — qualquer framework.\n\nGratuito, sem login, sem dados coletados.\n\n👉 https://chrome.google.com/webstore/detail/qa-overflow-picker\n\n#ChromeExtension #QA #Playwright #Selenium #TestesAutomatizados",
+    "image_prompt": "Browser with a developer tools sidebar showing CSS selectors and XPath, clean modern UI, code highlights"
+  },
+  "reddit": [
+    {
+      "subreddit": "QualityAssurance",
+      "title": "Criei uma extensão Chrome para extrair seletores em um clique — gratuita",
+      "body": "Fala galera, tudo certo?\n\nSempre achei chato ficar inspecionando elemento, procurando o melhor selector, copiando... então criei uma extensão Chrome que faz tudo isso em um clique.\n\nO QA OverFlow Picker:\n- Clica no elemento → mostra XPath, CSS, ID, Class, todos os atributos\n- Verifica se o selector é único (check verde) ou pega múltiplos (alerta laranja)\n- Tem um **editor ao vivo** — você edita o XPath/CSS na sidebar e vê os resultados na página\n- Atalho: Ctrl+Shift+E\n\nFunciona com Playwright, Cypress, Selenium, Puppeteer — qualquer framework.\n\nÉ gratuito, sem login, não coleta dados: https://chrome.google.com/webstore/detail/qa-overflow-picker\n\nQuem quiser testar e dar feedback, agradeço!"
+    }
+  ]
+}

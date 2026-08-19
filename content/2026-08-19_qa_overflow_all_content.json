@@ -1,0 +1,24 @@
+{
+  "project": "qa_overflow",
+  "date": "2026-08-19",
+  "blog_post": {
+    "title": "Design Patterns para Automação de Testes: Guia Prático com Playwright e Cypress",
+    "description": "Aprenda os principais design patterns que tornam suas suites de automação de testes mais maintáveis, escaláveis e robustas. Exemplos práticos com Playwright e Cypress.",
+    "slug": "design-patterns-automacao-testes",
+    "tags": ["qa", "testing", "automation", "playwright", "cypress"],
+    "excerpt": "Sua suíte de automação está ficando difícil de manter? Veja como Apply Object, Page Object e Factory Pattern podem transformar seus testes.",
+    "body_markdown": "# Design Patterns para Automação de Testes: Guia Prático\n\nSe você já escreveu automação de testes, provavelmente já enfrentou aquele momento em que os testes ficam tão acoplados que qualquer mudança quebram dezenas de scripts. É aí que os **Design Patterns** entram.\n\nNeste artigo, vamos ver os padrões mais usados na indústria, com exemplos práticos em **Playwright** e **Cypress**.\n\n## 1. Page Object Model (POM)\n\nO mais clássico e amplamente adotado. Separa a lógica de localização dos elementos da lógica dos testes.\n\n```typescript\n// Playwright - Page Object\nclass LoginPage {\n  constructor(private page: Page) {}\n\n  private emailInput = () => this.page.locator('#email');\n  private passwordInput = () => this.page.locator('#password');\n  private submitButton = () => this.page.locator('button[type=submit]');\n\n  async login(email: string, password: string) {\n    await this.emailInput().fill(email);\n    await this.passwordInput().fill(password);\n    await this.submitButton().click();\n  }\n}\n```\n\n**Vantagens:** Manutenção centralizada, reutilizabilidade, código limpo nos testes.\n\n## 2. Screenplay Pattern\n\nMais avançado, modela testes como **atores realizando ações em um cenário**. Excelente para testes complexos com múltiplos usuários.\n\n## 3. Data-Driven Testing\n\nSepara os dados dos testes da lógica. Ideal para validar múltiplas entradas no mesmo fluxo.\n\n```typescript\nconst testCases = [\n  { user: 'admin', expected: 'Dashboard' },\n  { user: 'viewer', expected: 'Read Only' },\n];\n\nfor (const tc of testCases) {\n  test(`Login as ${tc.user}`, async ({ page }) => {\n    await loginAs(page, tc.user);\n    await expect(page).toHaveTitle(tc.expected);\n  });\n}\n```\n\n## 4. Fixture Pattern (Cypress)\n\nNo Cypress, fixtures são nativos e permitem setup/teardown elegante:\n\n```typescript\ntest.use({\n  storageState: 'auth.json',\n});\n\n test('access dashboard', async ({ page }) => {\n  await page.goto('/dashboard');\n  await expect(page.locator('.stats')).toBeVisible();\n});\n```\n\n## Conclusão\n\nNão existe um pattern perfeito para todos os casos. O ideal é **combinar** POM com Data-Driven e ajustar conforme a complexidade do projeto.\n\nQuer aprender mais? Visite [QA Overflow](https://qaoverflow.com) para tutoriais completos.\n\n---\n*Artigo por Victor Oliveira - QA Senior com 13+ anos de experiência*",
+    "cover_image_prompt": "Minimalist illustration of code blocks organizing into clean architectural patterns, blue and purple gradient, modern tech style"
+  },
+  "linkedin": {
+    "text": "Sua suíte de automação de testes está cada vez mais difícil de manter?\n\nSe qualquer mudança pequena quebra dezenas de scripts, o problema não é a ferramenta — é a arquitetura.\n\nNeste artigo, compartilho os Design Patterns que uso há anos:\n\n🔹 Page Object Model — o básico que todo QA precisa dominar\n🔹 Screenplay Pattern — para cenários complexos com múltiplos atores\n🔹 Data-Driven Testing — separar dados da lógica\n🔹 Fixture Pattern — setup/teardown elegante no Cypress\n\nNão adianta escrever 500 testes se ninguém consegue manter 10.\n\n👉 Artigo completo: https://qaoverflow.com/design-patterns-automacao-testes\n\n#QA #TestesAutomatizados #QualityAssurance #Playwright #Cypress",
+    "image_prompt": "Clean infographic showing test automation architecture patterns"
+  },
+  "reddit": [
+    {
+      "subreddit": "QualityAssurance",
+      "title": "Design Patterns que transformaram minha suíte de automação de testes",
+      "body": "Fala galera, sou QA há 13+ anos e queria compartilhar os patterns que mais me ajudaram a manter suítes de automação saudáveis:\n\n**1. Page Object Model** — Separa localização dos elementos da lógica do teste. Se o botão muda de ID, você muda em um lugar só.\n\n**2. Data-Driven Testing** — Coloque seus dados em JSON/CSV e itere sobre eles. Testa 20 cenários com um loop.\n\n**3. Screenplay Pattern** — Para cenários complexos com múltiplos usuários. Modela como uma peça de teatro.\n\nEscrevi um artigo completo com exemplos em Playwright e Cypress: https://qaoverflow.com/design-patterns-automacao-testes\n\nQuais patterns vocês usam no dia a dia?"
+    }
+  ]
+}
