@@ -78,7 +78,7 @@ jobs:
     name: Gerar Conteudo
     runs-on: ubuntu-latest
     needs: [detect-day]
-    if: needs.detect-day.outputs.is_new_content == 'true' && needs.detect-day.outputs.dry_run != 'true'
+    if: needs.detect-day.outputs.is_new_content == 'true'
 
     steps:
       - name: Checkout
@@ -105,7 +105,7 @@ jobs:
     name: Publicar no Site
     runs-on: ubuntu-latest
     needs: [detect-day, generate-content]
-    if: always() && needs.detect-day.outputs.is_new_content == 'true' && needs.detect-day.outputs.dry_run != 'true' && needs.generate-content.result == 'success'
+    if: always() && needs.detect-day.outputs.is_new_content == 'true' && needs.generate-content.result == 'success'
 
     steps:
       - name: Checkout Marketing Automation
@@ -157,7 +157,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [detect-day, generate-content, publish-site, wait-deploy]
     if: |
-      always() && needs.detect-day.outputs.dry_run != 'true' && (
+      always() && (
         (needs.detect-day.outputs.is_repost == 'true') ||
         (needs.detect-day.outputs.is_new_content == 'true' && (needs.wait-deploy.result == 'success' || needs.publish-site.result == 'skipped'))
       )
@@ -205,7 +205,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [detect-day, generate-content, publish-site, wait-deploy]
     if: |
-      always() && needs.detect-day.outputs.dry_run != 'true' && (
+      always() && (
         (needs.detect-day.outputs.is_repost == 'true') ||
         (needs.detect-day.outputs.is_new_content == 'true' && (needs.wait-deploy.result == 'success' || needs.publish-site.result == 'skipped'))
       )
