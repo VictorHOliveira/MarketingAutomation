@@ -1,0 +1,60 @@
+# ============================================================
+# MARKETING AUTOMATION - Configuracao
+# ============================================================
+# Copie este arquivo para config.yaml e preencha suas API keys
+# NUNCA commite config.yaml no Git!
+# ============================================================
+
+# ------------------------------------------------------------
+# APIs - PREENCHA COM SUAS CREDENCIAIS
+# ------------------------------------------------------------
+apis:
+  # Canva Pro (Connect API)
+  # Criar integracao em: https://www.canva.com/developers/
+  canva:
+    client_id: "SEU_CLIENT_ID"
+    client_secret: "SEU_CLIENT_SECRET"
+    access_token: "SEU_ACCESS_TOKEN"
+    brand_templates:
+      qa_overflow: "ID_DO_TEMPLATE_QA_OVERFLOW"
+      scandoc: "ID_DO_TEMPLATE_SCANDOC"
+      supertarefas: "ID_DO_TEMPLATE_SUPERTAREFAS"
+      qa_picker: "ID_DO_TEMPLATE_QA_PICKER"
+
+  # Dev.to
+  # Gerar API key em: https://dev.to/settings/extensions
+  devto:
+    api_key: "SUA_API_KEY_DEVTO"
+    username: "seu_username_devto"
+
+  # LinkedIn
+  # Criar app em: https://www.linkedin.com/developers/
+  linkedin:
+    client_id: "SEU_CLIENT_ID"
+    client_secret: "SEU_CLIENT_SECRET"
+    access_token: "SEU_ACCESS_TOKEN"
+    person_urn: "urn:li:person:SEU_ID"
+
+  # Reddit (via PRAW)
+  # Criar app em: https://www.reddit.com/prefs/apps
+  reddit:
+    client_id: "SEU_CLIENT_ID"
+    client_secret: "SEU_CLIENT_SECRET"
+    username: "seu_username_reddit"
+    password: "sua_senha_reddit"
+    user_agent: "MarketingAutomation/1.0 by VictorOliveira"
+
+  # Twitter/X
+  # Criar app em: https://developer.x.com/
+  twitter:
+    api_key: "SUA_API_KEY"
+    api_secret: "SUA_API_SECRET"
+    access_token: "SEU_ACCESS_TOKEN"
+    access_token_secret: "SEU_ACCESS_TOKEN_SECRET"
+    bearer_token: "SEU_BEARER_TOKEN"
+
+  # OpenAI (para geracao de conteudo)
+  openai:
+    api_key: "SUA_API_KEY_OPENAI"
+    model: "gpt-4o"
+    max_tokens: 2000

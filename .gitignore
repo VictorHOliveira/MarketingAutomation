@@ -1,0 +1,18 @@
+config.yaml
+.env
+output/
+logs/
+__pycache__/
+*.pyc
+.env.*
+node_modules/
+.venv/
+
+# Scripts com secrets hardcoded
+linkedin_oauth.ps1
+linkedin_oauth.py
+linkedin_oauth2.ps1
+linkedin_oauth_final.ps1
+linkedin_post_utf8.ps1
+reddit_post_utf8.ps1
+devto_post_utf8.ps1
